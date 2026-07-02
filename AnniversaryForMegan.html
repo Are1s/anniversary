@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>For Megan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night: #1b1c3a;
+    --night-deep: #12132b;
+    --amber: #e8a355;
+    --rose: #f3a9c4;
+    --cream: #faf3e8;
+    --teal: #3f7570;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{height:100%; margin:0; overflow:hidden;}
+  body{
+    font-family:'Manrope', sans-serif;
+    background: radial-gradient(ellipse at 50% -10%, #2a2c5c 0%, var(--night) 45%, var(--night-deep) 100%);
+    color:var(--cream);
+    position:relative;
+    width:100vw; height:100vh;
+  }
+  .stars{position:absolute; inset:0; overflow:hidden; pointer-events:none;}
+  .star{position:absolute; background:var(--cream); border-radius:50%; opacity:.5; animation: twinkle 3s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:.15;} 50%{opacity:.7;}}
+
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 24px;
+    text-align:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .5s ease;
+  }
+  .scene.active{opacity:1; pointer-events:auto;}
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(28px, 8vw, 40px);
+    line-height:1.15;
+    margin:0 0 10px;
+    color:var(--cream);
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--amber); font-weight:800; margin-bottom:14px;
+  }
+  p{font-size:15px; line-height:1.55; color:#d9d7ea; margin:0 0 22px; max-width:320px;}
+
+  button{
+    font-family:'Manrope', sans-serif;
+    font-weight:800; font-size:15px; letter-spacing:.01em;
+    color:var(--night-deep);
+    background:var(--amber);
+    border:none; border-radius:999px;
+    padding:15px 36px;
+    cursor:pointer;
+    box-shadow:0 8px 24px rgba(232,163,85,.35);
+  }
+  button:active{transform:scale(.97);}
+  button.secondary{
+    background:transparent; color:var(--cream); border:1.5px solid rgba(250,243,232,.4);
+    box-shadow:none; margin-top:10px;
+  }
+
+  /* --- Route bar: the signature element --- */
+  .route-wrap{width:100%; max-width:420px; margin-bottom:6px;}
+  svg#route{width:100%; height:auto; display:block;}
+  .route-label{
+    display:flex; justify-content:space-between; width:100%; max-width:420px;
+    font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    color:#a8a6c4; font-weight:800; margin-top:2px;
+  }
+  .route-label span:last-child{color:var(--amber);}
+
+  /* --- Game scene --- */
+  #gameScene{justify-content:flex-start; padding-top:18px;}
+  .hud{width:100%; max-width:460px;}
+  #playfield{
+    position:relative;
+    width:100%; max-width:460px; flex:1;
+    margin-top:14px;
+    overflow:hidden;
+    border-radius:20px;
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+  }
+  .heart{
+    position:absolute;
+    font-size:30px;
+    cursor:pointer;
+    filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    user-select:none;
+    transition:transform .12s ease;
+    will-change:transform, top;
+  }
+  .heart:active{transform:scale(1.3);}
+  .pop{
+    position:absolute; font-size:13px; font-weight:800; color:var(--amber);
+    pointer-events:none; animation:popUp .6s ease-out forwards;
+  }
+  @keyframes popUp{ to{ transform:translateY(-30px); opacity:0; } }
+
+  /* --- Prize scene --- */
+  #prizeScene{overflow-y:auto; padding-top:50px; padding-bottom:50px;}
+  .stamp{
+    width:64px; height:64px; border:2px dashed rgba(250,243,232,.5); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    margin-bottom:18px; transform:rotate(-6deg);
+  }
+  .letter{
+    font-family:'Fraunces', serif;
+    background:var(--cream);
+    color:#2a2440;
+    border-radius:16px;
+    padding:26px 24px;
+    max-width:360px;
+    text-align:left;
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+  }
+  .letter p{
+    color:#2a2440; font-size:15.5px; line-height:1.6; max-width:none;
+    font-family:'Fraunces', serif; font-weight:400;
+  }
+  .letter .close{font-style:italic; font-weight:500; margin-top:16px;}
+  .sign{font-weight:600; font-style:italic; text-align:right; margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- INTRO -->
+<div class="scene active" id="introScene">
+  <div class="eyebrow">Brakpan &nbsp;✦&nbsp; Freiburg</div>
+  <h1>Happy Anniversary,<br>Megan</h1>
+  <p>9,000km apart, but every heart you catch closes the distance. Collect 25 to land the flight.</p>
+  <button onclick="startGame()">Start</button>
+</div>
+
+<!-- GAME -->
+<div class="scene" id="gameScene">
+  <div class="hud">
+    <div class="route-wrap">
+      <svg id="route" viewBox="0 0 420 90">
+        <path id="routePath" d="M 30 65 Q 210 -10 390 65" fill="none" stroke="rgba(250,243,232,.25)" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round"/>
+        <text x="18" y="82" font-size="10" fill="#a8a6c4" font-family="Manrope" font-weight="800">ZA</text>
+        <text x="378" y="82" font-size="10" fill="#a8a6c4" font-family="Manrope" font-weight="800">DE</text>
+        <circle cx="30" cy="65" r="4" fill="var(--teal)"/>
+        <circle cx="390" cy="65" r="4" fill="var(--rose)"/>
+        <text id="plane" x="30" y="60" font-size="20" text-anchor="middle">✈️</text>
+      </svg>
+    </div>
+    <div class="route-label"><span>Brakpan</span><span id="scoreLabel">0 / 25</span><span>Freiburg</span></div>
+  </div>
+  <div id="playfield"></div>
+</div>
+
+<!-- PRIZE -->
+<div class="scene" id="prizeScene">
+  <div class="stamp">💌</div>
+  <h1 style="font-size:26px;">You landed.</h1>
+  <div class="letter">
+    <p>My liebe Megan,</p>
+    <p>Happy anniversary. Brakpan to Freiburg is a long way to travel for a coffee — but I'd do it every day if I could.</p>
+    <p>Some years this relationship has run on flight prices, time zones, and counting down days. I know it's asked a lot of you. Thank you for staying anyway.</p>
+    <p>Soon enough there'll be no distance left to close: just the dogs settled in with you, a coffee I get to actually hand you instead of describe, and no goodbye at an airport gate.</p>
+    <p class="close">Until then — ich liebe dich, and I'm glad it's you on the other end of this.</p>
+    <p class="sign">— Armand</p>
+  </div>
+  <button class="secondary" onclick="startGame()">Play again</button>
+</div>
+
+<script>
+  // starfield
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<40;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    const size = Math.random()*2+1;
+    s.style.width = s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    starsEl.appendChild(s);
+  }
+
+  const GOAL = 25;
+  let score = 0;
+  let spawnTimer = null;
+  let fallTimer = null;
+  const field = document.getElementById('playfield');
+  const routePath = document.getElementById('routePath');
+  const plane = document.getElementById('plane');
+  const pathLen = routePath.getTotalLength();
+  const HEARTS = ['💖','💕','💗','❤️','💞'];
+
+  function showScene(id){
+    document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function updatePlane(){
+    const pct = Math.min(score/GOAL, 1);
+    const pt = routePath.getPointAtLength(pathLen*pct);
+    plane.setAttribute('x', pt.x);
+    plane.setAttribute('y', pt.y - 6);
+    document.getElementById('scoreLabel').textContent = `${score} / ${GOAL}`;
+  }
+
+  function startGame(){
+    score = 0;
+    field.innerHTML = '';
+    updatePlane();
+    showScene('gameScene');
+    clearInterval(spawnTimer);
+    clearInterval(fallTimer);
+    spawnTimer = setInterval(spawnHeart, 650);
+    fallTimer = setInterval(tickFall, 30);
+  }
+
+  function spawnHeart(){
+    if(field.querySelectorAll('.heart').length > 9) return;
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
+    const fw = field.clientWidth;
+    h.style.left = (Math.random()*(fw-40))+'px';
+    h.style.top = '-40px';
+    h.dataset.speed = (1 + Math.random()*1.6).toFixed(2);
+    h.addEventListener('click', ()=>catchHeart(h));
+    field.appendChild(h);
+  }
+
+  function tickFall(){
+    const fh = field.clientHeight;
+    field.querySelectorAll('.heart').forEach(h=>{
+      const top = parseFloat(h.style.top) + parseFloat(h.dataset.speed);
+      h.style.top = top+'px';
+      if(top > fh) h.remove();
+    });
+  }
+
+  function catchHeart(h){
+    const rect = h.getBoundingClientRect();
+    const fieldRect = field.getBoundingClientRect();
+    h.remove();
+    score++;
+    updatePlane();
+
+    const pop = document.createElement('div');
+    pop.className='pop';
+    pop.textContent='+1';
+    pop.style.left = (rect.left - fieldRect.left) + 'px';
+    pop.style.top = (rect.top - fieldRect.top) + 'px';
+    field.appendChild(pop);
+    setTimeout(()=>pop.remove(), 600);
+
+    if(score >= GOAL){
+      clearInterval(spawnTimer);
+      clearInterval(fallTimer);
+      setTimeout(()=>showScene('prizeScene'), 400);
+    }
+  }
+</script>
+
+</body>
+</html>
