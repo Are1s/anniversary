@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root { color-scheme: light; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+body { margin: 0; font-size: 14px; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Open When Letters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Special+Elite&family=Young+Serif&display=swap">
+<style>
+/* Layout: airmail masthead with a live two-zone clock, then a grid of airmail envelopes; tapping one lifts a letter sheet over the page. */
+:root {
+  --bg: #E8EDF4;
+  --paper: #FBFCFE;
+  --sheet: #FFFFFF;
+  --ink: #14213D;
+  --muted: #566178;
+  --line: #C5CEDC;
+  --red: #C8323C;
+  --blue: #2A5BA8;
+  --display: 'Young Serif', Georgia, 'Times New Roman', serif;
+  --hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  --type: 'Special Elite', 'Courier New', Courier, monospace;
+  --stripe: repeating-linear-gradient(135deg, var(--red) 0 12px, var(--paper) 12px 22px, var(--blue) 22px 34px, var(--paper) 34px 44px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1322;
+    --paper: #18233A;
+    --sheet: #1D2940;
+    --ink: #E9EEF8;
+    --muted: #9BA8C0;
+    --line: #34425F;
+    --red: #E5636D;
+    --blue: #6B9BE0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1322;
+  --paper: #18233A;
+  --sheet: #1D2940;
+  --ink: #E9EEF8;
+  --muted: #9BA8C0;
+  --line: #34425F;
+  --red: #E5636D;
+  --blue: #6B9BE0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  padding-block: 1.25rem 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1040px; margin: 0 auto; }
+.band { height: 10px; background: var(--stripe); }
+
+/* Masthead */
+.mast {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 1.75rem 3rem; padding-block: 1.75rem 1.5rem;
+}
+.mast-text { flex: 1 1 20rem; min-width: 0; }
+.kicker {
+  margin: 0 0 .7rem; font-family: var(--type); font-size: .8rem;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--red);
+}
+h1 {
+  margin: 0 0 1rem; font-family: var(--display); font-weight: 400;
+  font-size: clamp(2.7rem, 10vw, 4.8rem); line-height: 1; text-wrap: balance;
+}
+.lede { max-width: 33rem; margin: 0; font-size: 1.05rem; line-height: 1.55; color: var(--muted); }
+
+.clock {
+  flex: 0 1 19rem; min-width: 0; padding: 1rem 1.15rem 1.05rem;
+  background: var(--paper); border: 2px solid var(--blue); font-family: var(--type);
+}
+.clock-row { display: flex; justify-content: space-between; gap: 1rem; }
+.zone { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
+.zone-name { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.zone-time { font-size: 2.1rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.gap-note {
+  margin: .9rem 0 0; padding-top: .75rem; border-top: 1.5px dashed var(--line);
+  font-size: .85rem; line-height: 1.4; color: var(--muted);
+}
+
+.tally {
+  margin: 0 0 1.1rem; font-family: var(--type); font-size: .85rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+
+/* Envelopes */
+.grid {
+  list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+.env {
+  display: block; width: 100%; padding: 7px; border: 0; cursor: pointer;
+  text-align: left; font: inherit; color: inherit; background: var(--stripe);
+  box-shadow: 0 12px 24px -16px rgba(10, 20, 45, .6);
+  transition: transform .18s ease;
+}
+.env:hover { transform: translateY(-3px) rotate(-.4deg); }
+.env:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.env-face {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between;
+  gap: 1.2rem; aspect-ratio: 8 / 5; padding: .85rem .95rem .95rem; background: var(--paper);
+}
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }
+.par {
+  padding: .15rem .4rem; border: 1.5px solid var(--blue); color: var(--blue);
+  font-family: var(--type); font-size: .62rem; letter-spacing: .18em; text-transform: uppercase;
+}
+.marks { position: relative; flex: none; width: 4.8rem; height: 3.6rem; }
+.stamp {
+  position: absolute; right: 0; top: 0; width: 2.7rem; height: 3.2rem; padding: .2rem;
+  display: grid; place-items: center; border: 2px dashed var(--red); color: var(--red);
+  font-family: var(--type); font-size: .6rem; text-align: center;
+}
+.pm {
+  position: absolute; left: 0; top: .85rem; width: 2.9rem; height: 2.9rem;
+  display: grid; place-items: center; border: 2px solid var(--blue); border-radius: 50%;
+  color: var(--blue); opacity: .75; transform: rotate(-14deg);
+  font-family: var(--type); font-size: .55rem; line-height: 1.15; text-align: center;
+}
+.addr { display: flex; align-items: flex-end; justify-content: space-between; gap: .75rem; }
+.addr-text { min-width: 0; }
+.eyebrow {
+  display: block; margin-bottom: .2rem; font-family: var(--type); font-size: .72rem;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.env.first .eyebrow { color: var(--red); }
+.when {
+  display: block; font-family: var(--display); font-size: clamp(1.25rem, 4.6vw, 1.5rem);
+  line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere;
+}
+.seal {
+  flex: none; width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center;
+  background: var(--red); color: var(--paper); font-family: var(--display); font-size: 1rem;
+}
+.env.is-open .seal { background: transparent; border: 2px dashed var(--line); color: var(--muted); }
+.env.is-open .when { color: var(--muted); }
+
+/* Letter sheet */
+.overlay {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+           max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(8, 14, 28, .62); overscroll-behavior: contain;
+}
+.sheet {
+  position: relative; width: min(100%, 36rem); max-height: 100%; overflow-y: auto;
+  background: var(--sheet); border: 1px solid var(--line);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .6);
+  animation: rise .28s ease both;
+}
+.sheet::before { content: ""; display: block; height: 10px; background: var(--stripe); }
+.sheet-in { padding: 1.4rem 1.6rem 1.3rem; }
+.sheet .eyebrow { margin-bottom: .35rem; }
+.sheet.first .eyebrow { color: var(--red); }
+.sheet h2 {
+  margin: 0 0 1.1rem; font-family: var(--display); font-weight: 400;
+  font-size: clamp(1.6rem, 6vw, 2.1rem); line-height: 1.1; text-wrap: balance;
+}
+.letter { font-family: var(--hand); font-size: 1.6rem; line-height: 1.4; }
+.letter p { margin: 0 0 .75rem; }
+.letter .sign { margin: 1rem 0 0; font-size: 1.9rem; font-weight: 600; line-height: 1.15; }
+.sheet-foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem;
+  margin-top: 1.25rem; padding-top: 1rem; border-top: 1.5px dashed var(--line);
+}
+.pair { display: flex; gap: .5rem; flex-wrap: wrap; }
+.btn {
+  padding: .6rem .95rem; background: transparent; color: var(--ink); cursor: pointer;
+  border: 1.5px solid var(--ink); font-family: var(--type); font-size: .78rem;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.btn:hover { background: var(--ink); color: var(--sheet); }
+.btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.btn.solid { background: var(--ink); color: var(--sheet); }
+.btn.solid:hover { background: var(--red); border-color: var(--red); color: var(--paper); }
+
+.foot {
+  margin: 2.5rem 0 0; font-family: var(--type); font-size: .8rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(24px) rotate(-.6deg); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet { animation: none; }
+  .env { transition: none; }
+  .env:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="band" aria-hidden="true"></div>
+  <header class="mast">
+    <div class="mast-text">
+      <p class="kicker">Par avion &middot; South Africa to Germany</p>
+      <h1>Open when&hellip;</h1>
+      <p class="lede">Letters for <span id="toName">Megan</span>, from <span id="fromName">Armand</span>. Pick the envelope that fits how you feel right now. The one marked &ldquo;Open first&rdquo; goes first.</p>
+    </div>
+    <aside class="clock" id="clock" aria-label="Local times">
+      <div class="clock-row">
+        <div class="zone"><span class="zone-name">South Africa</span><span class="zone-time" id="tHome">--:--</span></div>
+        <div class="zone"><span class="zone-name">Germany</span><span class="zone-time" id="tAway">--:--</span></div>
+      </div>
+      <p class="gap-note" id="gapNote">Checking the time difference&hellip;</p>
+    </aside>
+  </header>
+
+  <p class="tally" id="tally">0 of 9 opened</p>
+  <ul class="grid" id="grid"></ul>
+  <p class="foot">Sent with love, all the way from South Africa.</p>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <article class="sheet" id="sheet">
+    <div class="sheet-in">
+      <span class="eyebrow" id="sheetEyebrow"></span>
+      <h2 id="sheetTitle"></h2>
+      <div class="letter" id="letter"></div>
+      <div class="sheet-foot">
+        <div class="pair">
+          <button type="button" class="btn" id="prevBtn">Previous</button>
+          <button type="button" class="btn" id="nextBtn">Next letter</button>
+        </div>
+        <button type="button" class="btn solid" id="closeBtn">Close</button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<script>
+(function () {
+  // Edit the names and the letters below to change what the page says.
+  var CONFIG = { to: 'Megan', from: 'Armand', home: 'Africa/Johannesburg', away: 'Europe/Berlin' };
+
+  var LETTERS = [
+    { first: true, eyebrow: 'Open first', when: 'Happy anniversary', body: [
+      'Happy anniversary. I wish I could put this in your hands, so I built you somewhere you can open it whenever you like.',
+      'Each envelope is for a different moment: when you miss me, when the day goes wrong, when you can’t sleep. I wrote every one of them thinking about you.',
+      'The distance is the hardest part of us, and you still make every day feel worth it. Thank you for choosing this with me. Open one whenever you need it.',
+      'I love you.' ] },
+    { eyebrow: 'Open when', when: 'you miss me', body: [
+      'I miss you too. Probably right now, probably at about the same time you’re reading this.',
+      'Some days the distance feels like a lot of kilometres. Other days it feels like nothing, because you’re the first person I want to tell everything to.',
+      'Send me a voice note or call me. I always want to hear from you, whatever I’m in the middle of.',
+      'Until I get to hold you again, keep this close: you’re always with me.' ] },
+    { eyebrow: 'Open when', when: 'today was rough', body: [
+      'I’m sorry today was hard. I wish I could be next to you right now.',
+      'Here’s what I’d say if I could: you’ve dealt with difficult things before and you’ll get through this too. You don’t have to be strong tonight.',
+      'Make a tea, put on something comfortable, and let the day end. Then call me and tell me all of it, or none of it. I’m happy to just be on the line with you.' ] },
+    { eyebrow: 'Open when', when: 'you can’t sleep', body: [
+      'Still awake? Me too, probably.',
+      'Close your eyes and picture us on a call, you telling me about nothing important and me listening. Breathe in for four, out for six. A few rounds of that helps more than you’d think.',
+      'Whatever is keeping your mind busy will still be there tomorrow, and you’ll handle it better after some rest. Sleep well. I’m thinking of you.' ] },
+    { eyebrow: 'Open when', when: 'you need a laugh', body: [
+      'You probably wanted a joke, so here’s the best one I have.',
+      'I study maths and computer science and I still can’t find a faster route across about 9,000 kilometres.',
+      'I know, I’m sorry. Send me your most unimpressed face and I’ll count it as a win. Honestly, your laugh is my favourite sound on a bad connection, and I’d tell much worse jokes to hear it.' ] },
+    { eyebrow: 'Open when', when: 'the distance feels long', body: [
+      'Some days the distance gets heavy. I feel it too, and I won’t pretend I don’t.',
+      'But I chose you, and I’d choose you again on the easy days and on the days when the time difference and the waiting wear us both out. Every call, every message and every plan gets us closer to the day we stop counting hours between us.',
+      'Hold on to that, and hold on to me. We’re doing really well.' ] },
+    { eyebrow: 'Open when', when: 'you doubt yourself', body: [
+      'Stop for a second and look at everything you’ve done lately. I mean it.',
+      'I see how hard you work and how much you care, even when nobody says it out loud. I’m proud of you, and I’m proud to be yours.',
+      'Whatever you’re about to do, you can do it. I’m cheering for you from the other side of the world.' ] },
+    { eyebrow: 'Open when', when: 'something good happens', body: [
+      'Something good happened, didn’t it? I can tell.',
+      'Tell me everything. I want every detail, even the small ones. I’m so happy for you, and I’m sorry I can’t celebrate in person.',
+      'We’ll make up for it with a very long call. Go on, ring me.' ] },
+    { eyebrow: 'Open when', when: 'you need a reminder', body: [
+      'In case you needed to hear it again: I love you.',
+      'I love your laugh, the way you look after the people around you, and how you make ordinary days feel like they matter. I love that you’re mine.',
+      'Thank you for every call, every voice note and every late night you stayed up to talk. I’ll keep showing up for you, whatever the distance.' ] }
+  ];
+
+  var KEY = 'open-when-letters-opened';
+  var opened = {};
+  try { var raw = localStorage.getItem(KEY); if (raw) opened = JSON.parse(raw) || {}; } catch (e) { opened = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(opened)); } catch (e) {} }
+
+  function $(id) { return document.getElementById(id); }
+  var grid = $('grid'), overlay = $('overlay'), tally = $('tally');
+  var current = -1;
+
+  $('toName').textContent = CONFIG.to;
+  $('fromName').textContent = CONFIG.from;
+
+  function labelFor(i) {
+    var l = LETTERS[i];
+    return l.eyebrow + ' ' + l.when + (opened[i] ? ' (already opened)' : '');
+  }
+
+  function renderGrid() {
+    var seal = CONFIG.from.charAt(0).toUpperCase();
+    grid.innerHTML = LETTERS.map(function (l, i) {
+      return '<li><button type="button" class="env' + (l.first ? ' first' : '') + (opened[i] ? ' is-open' : '') +
+        '" data-i="' + i + '" aria-label="' + labelFor(i) + '"><span class="env-face">' +
+        '<span class="top"><span class="par">Par avion</span>' +
+        '<span class="marks"><span class="pm">NOV<br>11</span><span class="stamp">ZA→DE</span></span></span>' +
+        '<span class="addr"><span class="addr-text"><span class="eyebrow">' + l.eyebrow + '</span>' +
+        '<span class="when">' + l.when + '</span></span><span class="seal" aria-hidden="true">' + seal + '</span></span>' +
+        '</span></button></li>';
+    }).join('');
+    updateTally();
+  }
+
+  function updateTally() {
+    var n = Object.keys(opened).filter(function (k) { return opened[k] && LETTERS[k]; }).length;
+    tally.textContent = n + ' of ' + LETTERS.length + ' opened';
+  }
+
+  function openLetter(i) {
+    var l = LETTERS[i];
+    current = i;
+    $('sheet').className = 'sheet' + (l.first ? ' first' : '');
+    $('sheetEyebrow').textContent = l.eyebrow;
+    $('sheetTitle').textContent = l.first ? l.when : l.when.charAt(0).toUpperCase() + l.when.slice(1);
+    var html = '<p>' + CONFIG.to + ',</p>' + l.body.map(function (p) { return '<p>' + p + '</p>'; }).join('') +
+      '<p class="sign">All my love,<br>' + CONFIG.from + '</p>';
+    $('letter').innerHTML = html;
+    overlay.hidden = false;
+    $('sheet').scrollTop = 0;
+    if (!opened[i]) {
+      opened[i] = true; save();
+      var btn = grid.querySelector('[data-i="' + i + '"]');
+      if (btn) { btn.classList.add('is-open'); btn.setAttribute('aria-label', labelFor(i)); }
+      updateTally();
+    }
+    $('closeBtn').focus();
+  }
+
+  function closeLetter() {
+    overlay.hidden = true;
+    var btn = grid.querySelector('[data-i="' + current + '"]');
+    if (btn) btn.focus();
+    current = -1;
+  }
+
+  grid.addEventListener('click', function (e) {
+    var b = e.target.closest('.env');
+    if (b) openLetter(+b.getAttribute('data-i'));
+  });
+  $('closeBtn').addEventListener('click', closeLetter);
+  $('nextBtn').addEventListener('click', function () { openLetter((current + 1) % LETTERS.length); });
+  $('prevBtn').addEventListener('click', function () { openLetter((current - 1 + LETTERS.length) % LETTERS.length); });
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeLetter(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !overlay.hidden) closeLetter();
+  });
+
+  /* Live clocks for both countries */
+  function offsetMin(tz, d) {
+    var p = {};
+    new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })
+      .formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
+    var asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, (+p.hour) % 24, +p.minute, +p.second);
+    return Math.round((asUTC - Math.floor(d.getTime() / 1000) * 1000) / 60000);
+  }
+  function fmt(tz, d) {
+    return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+  }
+  function tick() {
+    try {
+      var d = new Date();
+      $('tHome').textContent = fmt(CONFIG.home, d);
+      $('tAway').textContent = fmt(CONFIG.away, d);
+      var diff = (offsetMin(CONFIG.home, d) - offsetMin(CONFIG.away, d)) / 60;
+      var n = Math.abs(diff);
+      $('gapNote').textContent = diff === 0
+        ? 'Same time on both clocks right now.'
+        : 'South Africa is ' + n + (n === 1 ? ' hour ' : ' hours ') + (diff > 0 ? 'ahead of' : 'behind') + ' Germany right now.';
+    } catch (e) {
+      $('clock').hidden = true;
+    }
+  }
+
+  renderGrid();
+  tick();
+  setInterval(tick, 15000);
+})();
+</script>
+</body>
+</html>
