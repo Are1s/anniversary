@@ -29,30 +29,6 @@ img { max-width: 100%; }
   --type: 'Special Elite', 'Courier New', Courier, monospace;
   --stripe: repeating-linear-gradient(135deg, var(--red) 0 12px, var(--paper) 12px 22px, var(--blue) 22px 34px, var(--paper) 34px 44px);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #161515;
-    --paper: #211F1F;
-    --sheet: #292626;
-    --ink: #F3E7D3;
-    --muted: #B3A794;
-    --line: #3F3B3A;
-    --red: #E0525B;
-    --blue: #D9C3A0;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #161515;
-  --paper: #211F1F;
-  --sheet: #292626;
-  --ink: #F3E7D3;
-  --muted: #B3A794;
-  --line: #3F3B3A;
-  --red: #E0525B;
-  --blue: #D9C3A0;
-  color-scheme: dark;
-}
 * { box-sizing: border-box; }
 body {
   background: var(--bg);
